@@ -1,0 +1,76 @@
+const daySelect = document.getElementById('day');
+for (let i = 1; i <= 31; i++) {
+    const option = document.createElement('option');
+    option.value = i;
+    option.textContent = i;
+    daySelect.appendChild(option);
+}
+const yearSelect = document.getElementById('year');
+const currentYear = new Date().getFullYear();
+for (let i = currentYear; i >= 1950; i--) {
+    const option = document.createElement('option');
+    option.value = i;
+    option.textContent = i;
+    yearSelect.appendChild(option);
+}
+let originalImages = {
+    photo: null,
+    signature: null
+};
+document.getElementById('photo').addEventListener('change', function (e) {
+    handleImageUpload(e, 'photo');
+});
+document.getElementById('signature').addEventListener('change', function (e) {
+    handleImageUpload(e, 'signature');
+});
+
+function handleImageUpload(event, type) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            originalImages[type] = e.target.result;
+            displayPreview(e.target.result, type);
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function displayPreview(imageSrc, type) {
+    const previewBox = document.getElementById(type + 'Preview');
+    const cropControls = document.getElementById(type + 'CropControls');
+
+    previewBox.innerHTML = `
+                <h3>${type === 'photo' ? 'Photo' : 'Signature'} Preview</h3>
+                <img src="${imageSrc}" alt="${type} preview">
+            `;
+    previewBox.appendChild(cropControls);
+    cropControls.classList.add('active');
+}
+
+function acceptCrop(type) {
+    const cropControls = document.getElementById(type + 'CropControls');
+    cropControls.classList.remove('active');
+    alert(`${type === 'photo' ? 'Photo' : 'Signature'} accepted!`);
+}
+
+function cancelCrop(type) {
+    const input = document.getElementById(type);
+    input.value = '';
+    originalImages[type] = null;
+
+    const previewBox = document.getElementById(type + 'Preview');
+    previewBox.innerHTML = `
+                <h3>${type === 'photo' ? 'Photo' : 'Signature'} Preview</h3>
+                <p>No image selected</p>
+                <div class="crop-controls" id="${type}CropControls">
+                    <button type="button" class="crop-btn accept" onclick="acceptCrop('${type}')">✓ Accept</button>
+                    <button type="button" class="crop-btn cancel" onclick="cancelCrop('${type}')">✗ Cancel</button>
+                </div>
+            `;
+}
+
+document.getElementById('registrationForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    alert('✅ Registration submitted successfully!\n\nNote: This is a demo form. In a real application, the data would be sent to a server.');
+});
